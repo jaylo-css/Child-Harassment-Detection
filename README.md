@@ -19,6 +19,43 @@ uploaded chat logs.
 > prototype and has not had a legal review. Read [docs/PRIVACY.md](docs/PRIVACY.md) and
 > [docs/ETHICS.md](docs/ETHICS.md) first.
 
+## Chosen vertical
+
+**Child online safety: a guardian assistant.** The persona is a parent or legal guardian of a child
+aged roughly 9-15 who chats in games (Roblox, Mobile Legends, Discord) and messaging apps. The
+guardian cannot and should not read every message. They need an assistant that watches for the
+known pattern of online grooming and tells them, calmly and without exposing the child's private
+conversations, when a conversation needs their attention and what to do about it.
+
+## Approach and logic
+
+Grooming is a **process**, not a single bad message. It typically moves through stages:
+friendship, then probing for risk ("are your parents around?"), then building trust and
+exclusivity, isolating the child, asking for secrecy, moving to a private platform, and finally
+escalating (requests for private photos or to meet). Keyword filters either miss this or
+flood parents with false alarms. So the assistant makes decisions from **context**:
+
+| Decision | Context it uses |
+|---|---|
+| Whose messages count as evidence | Only the **other party's** messages are scored. The child's replies are used as context only. A child saying "my parents are out" is not a red flag by itself. |
+| How risky the conversation is | **Which** stages have appeared, whether they appear **in the expected order**, and **how fast** they progress. Old evidence decays (72 h half-life). |
+| When to alert | Only when the risk **level rises** (LOW, MEDIUM, HIGH, CRITICAL). MEDIUM alerts respect a cooldown. HIGH and CRITICAL always go through. |
+| When to be certain | High-precision combinations act as a **hard floor**: an escalation request together with secrecy or a platform move is at least HIGH, whatever the classifier says. |
+| When to ask a bigger model | The fast local model scores every message in milliseconds. The optional Claude rubric is consulted only once risk reaches MEDIUM, and the system falls back to the local model on any error. |
+| What to tell the guardian | Level-specific guidance (talk calmly, preserve evidence, don't confront the other person) and a report **checklist**, with at most 2 redacted excerpts and never a transcript. |
+
+## Assumptions
+
+* The guardian is legally responsible for the child and the child is told that protection is on
+  (the app shows a child notice and a persistent notification; there is no stealth mode).
+* Conversations are in English. Taglish and other languages are not supported yet.
+* Training and demo data are **synthetic** and non-explicit (600 generated conversations). Real-world
+  accuracy will be lower than the synthetic evaluation below.
+* On Android, chat text is available through notifications from allowlisted chat apps. Muted or
+  open chats are not seen.
+* A single backend instance serves one family or a demo. Live conversation state is held in memory.
+* The deployed demo runs in simulator mode with synthetic data only.
+
 ## How it works
 
 ```
@@ -221,16 +258,38 @@ synthetic scenario on a test channel, so you can test the whole phone, backend a
 any real chats. The listener accepts the app's own package only in debug builds and only on that
 channel.
 
-## Screenshots
-
-_Placeholder: add screenshots of the Alerts inbox, an assessment, the simulator and the Android status
-checklist here._
-
 ## Evaluation
 
 `make eval` writes `reports/latest.md`. The first run, with the baseline on the held-out synthetic
 test split, is in [reports/](reports/). The synthetic data is template-generated: about 25% of the
 phrasings appear only in the test split, but numbers on real chats will be lower.
+
+Baseline engine on the held-out test split (89 conversations):
+
+| Alert threshold | Precision | Recall | F1 | False alarms on benign chats | False alarms on hard negatives |
+|---|---|---|---|---|---|
+| MEDIUM | 0.81 | 0.68 | 0.74 | 8.9% | 7.7% |
+| HIGH | 0.90 | 0.58 | 0.71 | 4.4% | 0% |
+
+* **Early stages:** every grooming conversation that reached trust/exclusivity or a later stage was caught (21 of 21). The misses are conversations that stop at friendship or risk assessment, which read like normal chat.
+* **Latency:** live scoring takes 6 ms per message at the median and 15 ms at p95 (target: under 300 ms).
+
+## Testing
+
+* **Backend:** 101 pytest tests:
+  * parsers
+  * rules
+  * trajectory math
+  * batch/stream equivalence
+  * redaction and the alert excerpt limits
+  * the WebSocket and REST API
+  * device pairing and auth
+  * the LLM fallback, with a mocked client
+* **Android:** JVM unit tests for notification parsing, dedup, the allowlist, hashing, the offline queue and URL policy.
+* **CI** ([.github/workflows](.github/workflows)) runs on every push:
+  * ruff, pytest and the evaluation
+  * a Docker build with a smoke test
+  * `./gradlew test assembleDebug`, which publishes the APK
 
 ## Known limitations
 
