@@ -1,0 +1,81 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write # publish the debug APK as a pre-release
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platforms;android-35 build-tools;35.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests and debug APK
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon test assembleDebug 2>&1 | tee build.log
+
+      - name: Report compiler errors as annotations
+        if: failure()
+        run: |
+          grep -E '^(e: |FAILURE|\* What went wrong|> )|error:' build.log | head -60 | while IFS= read -r line; do
+            echo "::error::${line//$'\n'/ }"
+          done
+          grep -A3 -E 'FAILED$|tests completed' build.log | head -60 | while IFS= read -r line; do
+            echo "::error::${line}"
+          done
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: android/app/build/reports/tests/
+          if-no-files-found: ignore
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk safechat-guardian-debug.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: safechat-guardian-debug-apk
+          path: android/safechat-guardian-debug.apk
+
+      - name: Publish as "debug-latest" pre-release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: debug-latest
+          name: Android debug build (latest)
+          prerelease: true
+          make_latest: false
+          files: android/safechat-guardian-debug.apk
+          body: |
+            Debug build of the SafeChat Guardian Android companion app from commit ${{ github.sha }}.
+
+            * Prototype: install only on a phone used by a child you are legally responsible for, and show them the child notice.
+            * Sideloaded on Android 13+: enable "Allow restricted settings" in App info before turning on notification access.
+            * Each build is signed with a new debug key; uninstall the previous version before installing an update.
