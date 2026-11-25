@@ -1,0 +1,21 @@
+{% set real = devices | rejectattr('platform', 'equalto', 'simulator') | list %}
+{% if real %}
+<table class="tbl">
+  <thead><tr><th>Device</th><th>Platform</th><th>Status</th><th>Last seen</th><th>Last message</th><th></th></tr></thead>
+  <tbody>
+  {% for d in real %}
+  <tr class="{{ 'row-warn' if d.status == 'silent' }}">
+    <td>{{ d.name }}</td>
+    <td>{{ d.platform }}</td>
+    <td><span class="badge st-{{ d.status }}">{{ d.status }}</span>
+      {% if d.status == 'silent' %}<div class="small warn">No contact for over {{ settings.device_silence_hours }} h. Check notification access on the phone.</div>{% endif %}</td>
+    <td>{{ d.last_seen | ago }}</td>
+    <td>{{ d.last_message_at | ago }}</td>
+    <td>{% if d.status != 'revoked' %}<button class="btn small ghost" hx-post="/devices/{{ d.id }}/revoke" hx-target="#devices" hx-confirm="Revoke this device? It will stop sending messages.">Revoke</button>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No phones paired yet. Choose <b>Pair a phone</b> and scan the QR code with the SafeChat Guardian Android app.</p>
+{% endif %}

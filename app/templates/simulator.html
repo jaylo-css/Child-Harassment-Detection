@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Live simulator &middot; SafeChat Guardian{% endblock %}
+{% block content %}
+<div class="banner banner-sim inline" role="status">Simulated data. Messages typed here are synthetic and go through the same /ws/ingest path as a real device.</div>
+<div class="page-head">
+  <h1>Live simulator</h1>
+  <span id="ws-status" class="small muted" aria-live="polite">connecting&hellip;</span>
+</div>
+
+<div class="sim-grid">
+  <section class="card sim-chat">
+    <div class="sim-controls">
+      <div class="scenarios">
+        {% for sc in scenarios %}
+        <button class="btn small ghost" type="button" data-scenario="{{ sc.name }}" title="{{ sc.description }}">{{ sc.title }}</button>
+        {% endfor %}
+      </div>
+      <label class="speed">Speed <input id="speed" type="range" min="1" max="20" step="1" value="5"> <output id="speed-out">5x</output></label>
+      <button id="reset" class="btn small ghost" type="button">New conversation</button>
+    </div>
+    <ol id="chat" class="chat" aria-live="polite"></ol>
+    <form id="composer" class="composer" autocomplete="off">
+      <label for="msg" class="sr-only">Message</label>
+      <input id="msg" maxlength="500" placeholder="Type a synthetic message&hellip;">
+      <button class="btn small" type="submit" data-as="stranger">Send as stranger</button>
+      <button class="btn small alt" type="submit" data-as="child">Send as child</button>
+    </form>
+    <p id="toast" class="toast" role="status" hidden></p>
+  </section>
+  <section id="live" class="sim-live">
+    <p class="muted">Waiting for the first message&hellip;</p>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var TOKEN = {{ sim_token | tojson }};
+  var chat = document.getElementById('chat');
+  var statusEl = document.getElementById('ws-status');
+  var toast = document.getElementById('toast');
+  var speed = document.getElementById('speed');
+  var speedOut = document.getElementById('speed-out');
+  var platform = 'Simulator';
+  var convId, convKey = null, ws, ready = false, pending = [], replayToken = 0;
+
+  function rid() { return Math.random().toString(36).slice(2, 10); }
+  function newConversation() {
+    convId = 'sim-' + rid(); convKey = null; replayToken++;
+    chat.innerHTML = '';
+    document.getElementById('live').innerHTML = '<p class="muted">Waiting for the first message…</p>';
+    toast.hidden = true;
+  }
+  function connect() {
+    ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws/ingest');
+    ws.onopen = function () { ws.send(JSON.stringify({ type: 'auth', token: TOKEN })); };
+    ws.onmessage = function (e) {
+      var m = JSON.parse(e.data);
+      if (m.type === 'ready') { ready = true; statusEl.textContent = 'connected'; pending.splice(0).forEach(function (f) { ws.send(f); }); }
+      else if (m.type === 'ack') { convKey = m.conversation_key; }
+      else if (m.type === 'error') { statusEl.textContent = 'not authorized (reload the page)'; }
+    };
+    ws.onclose = function () { ready = false; statusEl.textContent = 'disconnected, retrying…'; setTimeout(connect, 1500); };
+  }
+  function send(text, asChild) {
+    text = text.trim(); if (!text) return;
+    var li = document.createElement('li');
+    li.className = asChild ? 'child' : 'other';
+    var who = document.createElement('span'); who.className = 'who'; who.textContent = asChild ? 'child' : 'stranger';
+    var txt = document.createElement('span'); txt.className = 'txt'; txt.textContent = text;
+    li.appendChild(who); li.appendChild(txt); chat.appendChild(li); chat.scrollTop = chat.scrollHeight;
+    var frame = JSON.stringify({ type: 'event', event: {
+      platform: platform, conversation_id: convId, sender_hash: asChild ? 'sim-child' : 'sim-stranger',
+      is_child: asChild, text: text, timestamp: new Date().toISOString(), event_id: rid() } });
+    if (ready) ws.send(frame); else pending.push(frame);
+  }
+  function refreshLive() {
+    if (!convKey || !window.htmx) return;
+    htmx.ajax('GET', '/partials/live?conversation=' + encodeURIComponent(convKey), { target: '#live', swap: 'innerHTML' });
+  }
+  var es = new EventSource('/api/live/stream');
+  es.addEventListener('score', function (ev) { var d = JSON.parse(ev.data); if (d.conversation_id === convKey) refreshLive(); });
+  es.addEventListener('alert', function (ev) {
+    var a = JSON.parse(ev.data);
+    if (a.conversation_id !== convKey) return;
+    toast.hidden = false;
+    toast.className = 'toast lvl-border-' + a.level;
+    toast.textContent = a.level + ' alert sent to the inbox: ' + (a.stage_labels || []).join(', ');
+  });
+
+  document.getElementById('composer').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = document.getElementById('msg');
+    var asChild = e.submitter && e.submitter.dataset.as === 'child';
+    send(input.value, asChild); input.value = ''; input.focus();
+  });
+  speed.addEventListener('input', function () { speedOut.textContent = speed.value + 'x'; });
+  document.getElementById('reset').addEventListener('click', newConversation);
+  document.querySelectorAll('[data-scenario]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      newConversation();
+      var mine = replayToken;
+      fetch('/api/simulator/scenarios/' + b.dataset.scenario).then(function (r) { return r.json(); }).then(function (sc) {
+        platform = sc.platform || 'Simulator';
+        var i = 0;
+        (function next() {
+          if (mine !== replayToken || i >= sc.messages.length) return;
+          var m = sc.messages[i++];
+          setTimeout(function () { if (mine === replayToken) { send(m.text, m.as === 'child'); next(); } },
+                     (m.delay || 1) * 1000 / Number(speed.value));
+        })();
+      });
+    });
+  });
+  newConversation();
+  connect();
+})();
+</script>
+{% endblock %}

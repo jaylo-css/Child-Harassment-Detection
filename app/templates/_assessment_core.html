@@ -1,0 +1,67 @@
+<div class="assess-grid">
+  <section class="card gauge-card">
+    <h2 class="h-sm">Risk</h2>
+    {{ gauge }}
+    <p class="muted small">{{ a.n_messages }} messages &middot; engine {{ a.engine }}
+      {% if a.first_alert_index is not none %}&middot; first MEDIUM+ at message {{ a.first_alert_index + 1 }}{% endif %}</p>
+  </section>
+  <section class="card timeline-card">
+    <h2 class="h-sm">Score over the conversation</h2>
+    {{ timeline }}
+    <p class="legend small">
+      {% for abbr, label in legend %}<span><b>{{ abbr }}</b> {{ label }}</span>{% endfor %}
+    </p>
+  </section>
+</div>
+
+<section class="card">
+  <h2 class="h-sm">Detected stages</h2>
+  {% if a.stages_detected %}
+  <ol class="stages">
+    {% for s in a.stages_detected %}
+    <li><span class="stage-chip">{{ stage_labels[s] }}</span>
+      <span class="muted small">first at message {{ a.stage_first_seen[s] + 1 }} &middot; evidence {{ '%.2f' | format(a.stage_evidence[s]) }}</span></li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="muted">No stage has strong evidence.</p>
+  {% endif %}
+  <div class="evidence">
+    {% for k, v in a.stage_evidence.items() %}
+    <div class="ev-row"><span>{{ stage_labels[k] }}</span>
+      <span class="bar" aria-hidden="true"><span style="width: {{ (v * 100) | round(0) }}%"></span></span>
+      <span class="num">{{ '%.2f' | format(v) }}</span></div>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="two-col">
+  <section class="card">
+    <h2 class="h-sm">Why this score</h2>
+    <ul class="explain">{% for line in a.explanation %}<li>{{ line }}</li>{% endfor %}</ul>
+    <p class="small muted">base {{ a.components.base }} + order {{ a.components.progression_bonus }} + speed {{ a.components.velocity_bonus }}{% if a.components.floor %} &middot; safety floor applied{% endif %}</p>
+  </section>
+  <section class="card">
+    <h2 class="h-sm">Signals</h2>
+    {% if a.top_signals %}
+    <table class="tbl">
+      <thead><tr><th>Signal</th><th>Stage</th><th>Weight</th><th>Msg</th></tr></thead>
+      <tbody>
+      {% for h in a.top_signals %}
+        <tr><td><code>{{ h.signal }}</code></td><td>{{ stage_labels[h.stage] }}</td><td>{{ h.weight }}</td><td>{{ h.message_id + 1 }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No rule-based signals fired.</p>{% endif %}
+    {% if a.top_windows %}
+    <h3 class="h-xs">Strongest windows</h3>
+    <ul class="small windows">
+      {% for w in a.top_windows %}
+      {% set best = w.stage_probs | dictsort(by='value', reverse=true) | rejectattr('0', 'equalto', 'NONE') | first %}
+      <li>messages {{ w.start + 1 }}&ndash;{{ w.end + 1 }}: {{ stage_labels.get(best[0], best[0]) }} {{ '%.2f' | format(best[1]) }} <span class="muted">({{ w.engine }})</span>
+        {% if w.rationale %}<br><span class="muted">{{ w.rationale }}</span>{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+</div>

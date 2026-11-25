@@ -1,0 +1,19 @@
+# SafeChat Guardian defaults. Environment variables override these; the Settings page
+# (operator mode) can override engine, thresholds, retention_days, redaction_enabled and
+# alert_cooldown_seconds at runtime.
+engine: baseline
+thresholds: {medium: 40, high: 70, critical: 85}
+window_size: 6
+window_stride: 3
+retention_days: 30
+redaction_enabled: true
+alert_cooldown_seconds: 900
+conversation_ttl_seconds: 21600
+device_silence_hours: 24
+trajectory:
+  half_life_hours: 72
+  stage_seen_threshold: 0.5
+  progression_max_bonus: 15
+  velocity_max_bonus: 10
+  velocity_ref_messages: 40
+  velocity_ref_hours: 48

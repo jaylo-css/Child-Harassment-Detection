@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Assessment &middot; SafeChat Guardian{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Assessment</h1>
+  <a class="btn ghost" href="/analyze">Analyze another chat</a>
+</div>
+{% include "_assessment_core.html" %}
+
+{% if transcript is not none %}
+<section class="card">
+  <details>
+    <summary><b>Transcript</b> <span class="muted small">(demo operator only &middot; {{ 'redacted' if redacting else 'NOT redacted' }} &middot; not stored)</span></summary>
+    {% if not redacting %}<p class="warn small">Redaction is off in Settings. Turn it back on before showing this screen to anyone.</p>{% endif %}
+    <ol class="transcript">
+      {% for m in transcript %}
+      <li class="{{ 'child' if m.is_child else 'other' }} {{ 'flag' if m.flag }}">
+        <span class="who">{{ m.sender }}</span><span class="txt">{{ m.text }}</span>{% if m.flag %}<span class="flag-dot" title="Signal fired on this message"></span>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </details>
+</section>
+{% endif %}
+{% endblock %}

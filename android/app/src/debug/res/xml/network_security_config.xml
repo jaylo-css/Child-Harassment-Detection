@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- DEBUG ONLY: allow plain HTTP/WS so a phone can reach the backend on the PC's LAN IP.
+     The app additionally refuses http:// unless the host is a private LAN address
+     (see core/Network.kt UrlPolicy). Release builds use HTTPS/WSS only. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

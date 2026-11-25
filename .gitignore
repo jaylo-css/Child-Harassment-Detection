@@ -1,0 +1,30 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Local data - never commit
+data/pan2012/*
+!data/pan2012/README.md
+data/guardian.db*
+data/*.db*
+data/.hash_salt
+.env
+
+# Generated (reproducible with `make seed train eval`; keep if you want a pinned copy)
+models/*.joblib
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.iml
+*.apk
+*.aab
+*.keystore
+*.jks

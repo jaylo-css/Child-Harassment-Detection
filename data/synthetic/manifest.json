@@ -1,0 +1,35 @@
+{
+  "by_label": {
+    "benign": 300,
+    "grooming": 210,
+    "hard_negative": 90
+  },
+  "by_split": {
+    "test": 89,
+    "train": 420,
+    "val": 91
+  },
+  "by_split_label": {
+    "test/benign": 45,
+    "test/grooming": 31,
+    "test/hard_negative": 13,
+    "train/benign": 210,
+    "train/grooming": 147,
+    "train/hard_negative": 63,
+    "val/benign": 45,
+    "val/grooming": 32,
+    "val/hard_negative": 14
+  },
+  "grooming_depth": {
+    "ESCALATION": 58,
+    "FRIENDSHIP": 24,
+    "ISOLATION": 14,
+    "PLATFORM_MOVE": 40,
+    "RISK_ASSESSMENT": 31,
+    "SECRECY": 28,
+    "TRUST_EXCLUSIVITY": 15
+  },
+  "messages": 17463,
+  "n": 600,
+  "seed": 1337
+}

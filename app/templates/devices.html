@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Devices &middot; SafeChat Guardian{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Connected devices</h1>
+  <button class="btn" hx-post="/devices/pair" hx-target="#pairing" hx-swap="innerHTML">Pair a phone</button>
+</div>
+<div id="pairing"></div>
+<section class="card">
+  <div id="devices" hx-get="/partials/devices" hx-trigger="every 30s">
+    {% include "_devices.html" %}
+  </div>
+  <p class="small muted">A device that has not checked in for more than {{ settings.device_silence_hours }} hours is marked <b>silent</b>. This often means notification access was turned off, the phone is off, or battery optimization stopped the app.</p>
+</section>
+{% endblock %}

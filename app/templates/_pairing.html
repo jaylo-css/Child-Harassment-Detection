@@ -1,0 +1,9 @@
+<section class="card pairing">
+  <div class="qr" aria-label="Pairing QR code">{{ qr }}</div>
+  <div>
+    <h2 class="h-sm">Scan with the Android app</h2>
+    <p>Open SafeChat Guardian on the child's phone, choose <b>Pair with dashboard</b> and scan this code.</p>
+    <p>Or enter it manually: server <code>{{ p.server_url }}</code>, code <code class="code">{{ p.code }}</code></p>
+    <p class="small muted">One-time code. Expires {{ p.expires_at[:16].replace('T', ' ') }} UTC. The phone must be able to reach this server address (same Wi-Fi or a tunnel; see README).</p>
+  </div>
+</section>

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Analyze &middot; SafeChat Guardian{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Analyze a chat</h1></div>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form class="card form" method="post" action="/analyze" enctype="multipart/form-data">
+  {% if participants %}
+  <fieldset>
+    <legend>Which participant is the child?</legend>
+    <p class="muted small">Only the other participants' messages are checked for warning signs.</p>
+    <div class="choices">
+      {% for p in participants %}
+      <label class="choice"><input type="radio" name="child" value="{{ p }}" {{ 'checked' if loop.first }} required> {{ p }}</label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  <input type="hidden" name="text" value="{{ form.text }}">
+  {% else %}
+  <label for="text">Paste a chat</label>
+  <textarea id="text" name="text" rows="10" placeholder="Name: message&#10;Other: message&#10;&#10;JSON and CSV also work.">{{ form.text or '' }}</textarea>
+  <label for="upload">Or upload a file (.txt, .json, .jsonl, .csv, up to 2 MB)</label>
+  <input id="upload" type="file" name="upload" accept=".txt,.json,.jsonl,.csv">
+  <label for="child">Child's name in the chat (optional, you can pick it next)</label>
+  <input id="child" name="child" value="{{ form.child or '' }}" autocomplete="off">
+  {% endif %}
+  <div class="row">
+    <div>
+      <label for="platform">Platform</label>
+      <select id="platform" name="platform">
+        {% for p in ['', 'Roblox', 'Minecraft', 'Mobile Legends', 'Fortnite', 'Discord', 'Messenger', 'Other'] %}
+        <option value="{{ p }}" {{ 'selected' if form.platform == p }}>{{ p or 'Unknown' }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="engine">Engine</label>
+      <select id="engine" name="engine">
+        <option value="">Default ({{ effective_engine }})</option>
+        <option value="baseline">baseline (offline)</option>
+        {% if settings.llm_available %}<option value="llm">llm</option><option value="ensemble">ensemble</option>{% endif %}
+      </select>
+    </div>
+  </div>
+  <button class="btn" type="submit">{{ 'Analyze' if participants else 'Continue' }}</button>
+  <p class="small muted">The chat text is processed in memory and not stored. Only the score, stages and explanation are saved.</p>
+</form>
+{% endblock %}

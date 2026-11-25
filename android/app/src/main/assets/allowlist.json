@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "apps": [
+    {"packageName": "com.facebook.orca", "label": "Messenger"},
+    {"packageName": "com.discord", "label": "Discord"},
+    {"packageName": "com.roblox.client", "label": "Roblox"},
+    {"packageName": "com.whatsapp", "label": "WhatsApp"},
+    {"packageName": "org.telegram.messenger", "label": "Telegram"},
+    {"packageName": "com.instagram.android", "label": "Instagram"},
+    {"packageName": "com.snapchat.android", "label": "Snapchat"},
+    {"packageName": "com.mobile.legends", "label": "Mobile Legends"}
+  ]
+}

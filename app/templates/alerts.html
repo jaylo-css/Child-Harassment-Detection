@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Alerts &middot; SafeChat Guardian{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Alerts</h1>
+  <div class="head-actions">
+    <span id="live-status" class="small muted" aria-live="polite">connecting&hellip;</span>
+    <button id="notify-btn" class="btn ghost small" type="button" hidden>Enable browser notifications</button>
+  </div>
+</div>
+<p class="muted small intro">Each alert shows the risk level, the warning signs detected and at most two short, redacted excerpts. Full conversations are never shown here.</p>
+<div id="alert-list" hx-get="/partials/alerts" hx-trigger="refresh">
+  {% include "_alert_list.html" %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var status = document.getElementById('live-status');
+  var btn = document.getElementById('notify-btn');
+  if ('Notification' in window && Notification.permission === 'default') {
+    btn.hidden = false;
+    btn.addEventListener('click', function () {
+      Notification.requestPermission().then(function () { btn.hidden = true; });
+    });
+  }
+  var es = new EventSource('/api/alerts/stream');
+  es.addEventListener('hello', function () { status.textContent = 'live'; });
+  es.onerror = function () { status.textContent = 'reconnecting…'; };
+  es.addEventListener('alert', function (ev) {
+    var a = JSON.parse(ev.data);
+    if (window.htmx) { htmx.trigger('#alert-list', 'refresh'); } else { location.reload(); }
+    if ('Notification' in window && Notification.permission === 'granted') {
+      // Notification text: level and stage names only, never message content.
+      new Notification('SafeChat Guardian: ' + a.level + ' risk', {
+        body: (a.stage_labels || []).join(', ') || 'New warning signs detected',
+        tag: a.conversation_id
+      });
+    }
+  });
+})();
+</script>
+{% endblock %}

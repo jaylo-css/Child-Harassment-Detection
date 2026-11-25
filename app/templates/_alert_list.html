@@ -1,0 +1,25 @@
+{% if alerts %}
+{% for al in alerts %}
+<article class="alert-card lvl-border-{{ al.level }} {{ 'acked' if al.acknowledged }}">
+  <header>
+    <span class="level-badge lvl-{{ al.level }}">{{ al.level }}</span>
+    <span class="muted small"><time datetime="{{ al.created_at }}">{{ al.created_at[:16].replace('T', ' ') }} UTC</time>{% if al.platform %} &middot; {{ al.platform }}{% endif %}</span>
+    {% if al.acknowledged %}<span class="badge ok">Reviewed</span>{% endif %}
+  </header>
+  <p class="summary">{{ al.summary }}</p>
+  {% if al.stage_labels %}<p class="chips">{% for l in al.stage_labels %}<span class="stage-chip">{{ l }}</span>{% endfor %}</p>{% endif %}
+  {% if al.excerpts %}
+  <ul class="excerpts">{% for e in al.excerpts %}<li><q>{{ e }}</q></li>{% endfor %}</ul>
+  {% endif %}
+  {% if al.suggested_actions %}
+  <p class="small"><b>Suggested:</b> {{ al.suggested_actions[0] }}</p>
+  {% endif %}
+  <a class="btn small" href="/alerts/{{ al.id }}">What to do</a>
+</article>
+{% endfor %}
+{% else %}
+<div class="empty card">
+  <p><b>No alerts yet.</b></p>
+  <p class="muted">Alerts appear here in real time when a conversation shows warning signs. You only see warning signs, never full conversations.</p>
+</div>
+{% endif %}

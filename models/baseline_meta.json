@@ -1,0 +1,21 @@
+{
+  "trained_at": "2026-11-21T00:35:03",
+  "c": 4.0,
+  "sources": {
+    "synthetic_train_windows": 6248
+  },
+  "val_windows": 1334,
+  "val_micro_f1": 0.9987,
+  "val_macro_f1": 0.9989,
+  "val_f1_per_stage": {
+    "NONE": 0.9988,
+    "FRIENDSHIP": 1.0,
+    "RISK_ASSESSMENT": 0.9928,
+    "TRUST_EXCLUSIVITY": 1.0,
+    "ISOLATION": 1.0,
+    "SECRECY": 1.0,
+    "PLATFORM_MOVE": 1.0,
+    "ESCALATION": 1.0
+  },
+  "seconds": 4.6
+}

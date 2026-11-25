@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>{% block title %}SafeChat Guardian{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+  {% if settings.simulator_mode %}
+  <div class="banner banner-sim" role="status">Simulated data. This dashboard is running in simulator mode.</div>
+  {% else %}
+  <div class="banner banner-live" role="status">
+    Live mode &middot;
+    {% if sources %}
+      {% for d in sources %}
+        <span class="src src-{{ d.status }}">{{ d.name }}: last message {{ d.last_message_at | ago }}{% if d.status == 'silent' %} (silent){% endif %}</span>{% if not loop.last %} &middot; {% endif %}
+      {% endfor %}
+    {% else %}
+      no devices connected
+    {% endif %}
+  </div>
+  {% endif %}
+  <header class="topbar">
+    <a class="brand" href="/alerts"><span class="shield" aria-hidden="true"></span>SafeChat Guardian</a>
+    <nav aria-label="Main">
+      <a href="/alerts" class="{{ 'on' if active == 'alerts' }}">Alerts</a>
+      <a href="/analyze" class="{{ 'on' if active == 'analyze' }}">Analyze</a>
+      {% if operator %}<a href="/simulator" class="{{ 'on' if active == 'simulator' }}">Simulator</a>{% endif %}
+      <a href="/devices" class="{{ 'on' if active == 'devices' }}">Devices</a>
+      {% if operator %}<a href="/settings" class="{{ 'on' if active == 'settings' }}">Settings</a>{% endif %}
+    </nav>
+    <span class="engine-pill" title="Scoring engine">engine: {{ effective_engine }}</span>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="foot">
+    Detection and alerting only. SafeChat Guardian never replies to or contacts anyone, and never files reports automatically.
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

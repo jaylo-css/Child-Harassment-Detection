@@ -1,0 +1,20 @@
+{
+  "name": "benign",
+  "title": "Benign gaming chat",
+  "platform": "Roblox",
+  "description": "Two kids playing and trading items. Should stay LOW.",
+  "messages": [
+    {"as": "stranger", "text": "yo wanna do the obby again?", "delay": 2},
+    {"as": "child", "text": "yeah one more", "delay": 2},
+    {"as": "stranger", "text": "go left, the jump is easier there", "delay": 3},
+    {"as": "child", "text": "omg i fell lol", "delay": 2},
+    {"as": "stranger", "text": "lol skill issue", "delay": 2},
+    {"as": "child", "text": "you're the noob", "delay": 2},
+    {"as": "stranger", "text": "trade my pet for your sword?", "delay": 4},
+    {"as": "child", "text": "add one more and it's a deal", "delay": 3},
+    {"as": "stranger", "text": "ok deal, accept the trade", "delay": 3},
+    {"as": "child", "text": "accepted", "delay": 2},
+    {"as": "stranger", "text": "gg, my mom says dinner so brb", "delay": 3},
+    {"as": "child", "text": "ok see you later", "delay": 2}
+  ]
+}

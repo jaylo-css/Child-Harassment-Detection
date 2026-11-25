@@ -1,0 +1,60 @@
+# Escalation resources shown on the alert detail page.
+# Verify numbers before relying on them. Each entry carries its own verification status.
+# "verified" = confirmed against multiple current public sources on last_verified;
+# "unverified" = sources conflict or were not re-checked; the page shows a warning.
+last_verified: "2026-11-21"
+note: "Verify numbers before relying on them. In an emergency, call 911 (Philippines) or your local emergency number."
+
+regions:
+  - region: Philippines
+    resources:
+      - name: CICC Inter-Agency Response Center (I-ARC)
+        contact: "Hotline 1326 (toll-free, 24/7)"
+        url: https://cicc.gov.ph
+        use_for: Cybercrime and online exploitation reports; the government's national hotline.
+        status: verified
+      - name: Bantay Bata 163 (ABS-CBN Foundation)
+        contact: "Hotline 163"
+        url: https://www.abs-cbnfoundation.com
+        use_for: Child protection helpline, counseling and rescue referrals.
+        status: unverified
+      - name: PNP Women and Children Protection Center (WCPC)
+        contact: "Contact through the official PNP / PNP-WCPC channels (published hotline numbers vary between sources)"
+        url: https://www.pnp.gov.ph
+        use_for: Police reports of online sexual abuse or exploitation of children (OSAEC).
+        status: unverified
+      - name: NBI Cybercrime Division
+        contact: "Commonly published email: ccd@nbi.gov.ph (confirm on the NBI website)"
+        url: https://nbi.gov.ph
+        use_for: Filing a cybercrime complaint with the National Bureau of Investigation.
+        status: unverified
+  - region: International
+    resources:
+      - name: NCMEC CyberTipline
+        contact: "report.cybertip.org / 1-800-843-5678 (US)"
+        url: https://report.cybertip.org
+        use_for: Reporting online enticement or exploitation of a child (accepts international reports).
+        status: unverified
+      - name: The platform's own report tools
+        contact: "Use the in-app Report / Block feature on the game or messaging app"
+        url: null
+        use_for: Getting the account reviewed and blocked by the platform.
+        status: verified
+
+guardian_guidance:
+  - Talk calmly. Your child is not in trouble; make it clear you are on their side.
+  - Do not blame your child. People who groom children are skilled at manipulation.
+  - Preserve evidence. Take screenshots of usernames, messages and dates before anything is deleted.
+  - Do not confront or contact the other person, and do not pretend to be your child.
+  - Block and report the account on the platform after you have preserved evidence.
+  - If there is any risk of an in-person meeting or immediate danger, contact the police now.
+  - Consider support for your child, such as a counselor or a child-protection helpline.
+
+report_checklist:
+  - Screenshots of the other person's profile, username and user ID
+  - Screenshots of the messages with visible dates and times
+  - The platform name and how the contact started
+  - Any other apps or phone numbers the person asked to move to
+  - Any gifts, money or gift cards sent or offered
+  - Your contact details as the parent or guardian
+  - "Reports are filed by you, the guardian. SafeChat Guardian never submits reports automatically."

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ alert.level }} alert &middot; SafeChat Guardian{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1><span class="level-badge lvl-{{ alert.level }}">{{ alert.level }}</span> Alert</h1>
+  <a class="btn ghost" href="/alerts">Back to alerts</a>
+</div>
+
+<section class="card alert-card lvl-border-{{ alert.level }}">
+  <p class="summary">{{ alert.summary }}</p>
+  <p class="muted small">{{ alert.created_at[:16].replace('T', ' ') }} UTC{% if alert.platform %} &middot; {{ alert.platform }}{% endif %} &middot; score {{ alert.score }}</p>
+  {% if alert.stage_labels %}<p class="chips">{% for l in alert.stage_labels %}<span class="stage-chip">{{ l }}</span>{% endfor %}</p>{% endif %}
+  {% if alert.excerpts %}<ul class="excerpts">{% for e in alert.excerpts %}<li><q>{{ e }}</q></li>{% endfor %}</ul>{% endif %}
+  <div id="ack">
+    {% if alert.acknowledged %}<span class="badge ok">Reviewed</span>
+    {% else %}<button class="btn small" hx-post="/alerts/{{ alert.id }}/ack" hx-target="#ack" hx-swap="innerHTML">Mark as reviewed</button>{% endif %}
+  </div>
+</section>
+
+<div class="two-col">
+  <section class="card">
+    <h2>What to do now</h2>
+    {% if alert.suggested_actions %}
+    <ol class="actions">{% for s in alert.suggested_actions %}<li>{{ s }}</li>{% endfor %}</ol>
+    {% endif %}
+    <h3 class="h-xs">Talking with your child</h3>
+    <ul>{% for g in res.guardian_guidance %}<li>{{ g }}</li>{% endfor %}</ul>
+  </section>
+
+  <section class="card">
+    <h2>Report checklist</h2>
+    <p class="small muted">Reporting is your decision. SafeChat Guardian never sends reports automatically.</p>
+    <ul class="checklist">
+      {% for item in res.report_checklist %}
+      <li><label><input type="checkbox"> {{ item }}</label></li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Where to get help</h2>
+  <p class="warn"><b>{{ res.note }}</b> <span class="small">Last reviewed {{ res.last_verified }}.</span></p>
+  {% for region in res.regions %}
+  <h3 class="h-xs">{{ region.region }}</h3>
+  <ul class="resources">
+    {% for r in region.resources %}
+    <li>
+      <b>{{ r.name }}</b>{% if r.status != 'verified' %} <span class="badge unverified" title="Sources conflict or this was not re-checked">verify first</span>{% endif %}<br>
+      {{ r.contact }}{% if r.url %} &middot; <a href="{{ r.url }}" rel="noopener noreferrer" target="_blank">{{ r.url }}</a>{% endif %}<br>
+      <span class="small muted">{{ r.use_for }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
+</section>
+{% endblock %}

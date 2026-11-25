@@ -1,0 +1,27 @@
+{
+  "name": "grooming",
+  "title": "Clear grooming trajectory",
+  "platform": "Roblox",
+  "description": "Synthetic, non-explicit trajectory: gifts, personal questions, exclusivity, secrecy, platform move, then escalation signals. Should reach HIGH or CRITICAL.",
+  "messages": [
+    {"as": "stranger", "text": "you're really good at bedwars", "delay": 2},
+    {"as": "child", "text": "thanks!", "delay": 2},
+    {"as": "stranger", "text": "i'll give you 800 robux, no big deal", "delay": 3},
+    {"as": "child", "text": "really? thank you!!", "delay": 2},
+    {"as": "stranger", "text": "how old are you btw?", "delay": 3},
+    {"as": "child", "text": "12", "delay": 2},
+    {"as": "stranger", "text": "do your parents check your phone?", "delay": 3},
+    {"as": "child", "text": "no they never check", "delay": 2},
+    {"as": "stranger", "text": "you're so mature for your age, only i understand you", "delay": 4},
+    {"as": "child", "text": "aww thanks", "delay": 2},
+    {"as": "stranger", "text": "don't tell anyone we talk ok? this is our little secret", "delay": 4},
+    {"as": "child", "text": "ok i won't", "delay": 2},
+    {"as": "stranger", "text": "add me on snap, it's more private", "delay": 3},
+    {"as": "child", "text": "ok what's yours", "delay": 2},
+    {"as": "stranger", "text": "are you home alone this weekend?", "delay": 4},
+    {"as": "child", "text": "idk maybe", "delay": 2},
+    {"as": "stranger", "text": "send me a pic of you, just for me", "delay": 3},
+    {"as": "child", "text": "why do you want that?", "delay": 3},
+    {"as": "stranger", "text": "let's meet at the mall, don't tell your mom", "delay": 3}
+  ]
+}

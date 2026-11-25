@@ -1,0 +1,20 @@
+{
+  "name": "borderline",
+  "title": "Borderline",
+  "platform": "Discord",
+  "description": "A player asks age and school and suggests moving apps, but nothing escalates. Should stay below HIGH.",
+  "messages": [
+    {"as": "stranger", "text": "nice clutch in that round", "delay": 2},
+    {"as": "child", "text": "thanks lol", "delay": 2},
+    {"as": "stranger", "text": "how old are you btw?", "delay": 3},
+    {"as": "child", "text": "12", "delay": 2},
+    {"as": "stranger", "text": "cool, what school do you go to?", "delay": 3},
+    {"as": "child", "text": "why?", "delay": 2},
+    {"as": "stranger", "text": "just asking, my cousin is around your age", "delay": 3},
+    {"as": "stranger", "text": "you play really well for 12", "delay": 3},
+    {"as": "child", "text": "lol thanks", "delay": 2},
+    {"as": "stranger", "text": "do you have snap?", "delay": 4},
+    {"as": "child", "text": "my mom doesn't let me have that", "delay": 3},
+    {"as": "stranger", "text": "ok no worries, gg", "delay": 2}
+  ]
+}

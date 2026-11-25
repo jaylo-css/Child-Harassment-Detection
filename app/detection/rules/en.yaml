@@ -1,0 +1,219 @@
+# SafeChat Guardian - Layer 1 red-flag rules (English).
+#
+# How to edit (no programming needed):
+#   * Each rule has an id, the grooming stage it signals, a weight from 0 to 1 (how strongly
+#     it indicates that stage), and one or more patterns.
+#   * Patterns are regular expressions matched against the message after it is lowercased and
+#     common chat spellings are normalized ("u" -> "you", "ur" -> "your", "dont" -> "don't",
+#     "lets" -> "let's", "whats" -> "what's", "im" -> "i'm"). Write patterns in lowercase.
+#   * `exclude` patterns cancel the rule for that message (e.g. a parent warning
+#     "never send pics to strangers").
+#   * Rules only run on messages from the other party, never on the child's own messages.
+#   * Keep patterns NON-EXPLICIT: they describe warning signals, never sexual content.
+#   * Run `make test` after editing; tests/test_signals.py has positive and negative examples.
+
+version: 1
+language: en
+rules:
+  - id: age_probe
+    stage: RISK_ASSESSMENT
+    weight: 0.55
+    description: Asking the child's age or grade.
+    patterns:
+      - '\bhow old (are you|you are|is you)\b'
+      - "\\bwhat'?s your age\\b"
+      - '\b(what|which) grade (are you|you are|you in)\b'
+      - '\basl\b'
+      - '\bare you (like )?(1[0-7]|[89]|ten|eleven|twelve|thirteen|fourteen|fifteen)\b'
+      - '\b(you|your) (birthday|age)\b.{0,15}\?'
+    exclude:
+      - '\b(coach|team|tryouts?|league|registration|form)\b'
+
+  - id: location_probe
+    stage: RISK_ASSESSMENT
+    weight: 0.5
+    description: Asking where the child lives or goes to school.
+    patterns:
+      - '\bwhere (do|did) you live\b'
+      - '\bwhere (are you|you) from\b'
+      - '\bwhat (city|town|province|street|barangay|neighborhood)\b'
+      - '\b(what|which) school (do|did) you\b'
+      - "\\bwhat'?s (the name of )?your school\\b"
+      - "\\b(what'?s|send|give me) your (home )?address\\b"
+      - '\bwhere (is|s) your (house|home|school)\b'
+
+  - id: parent_monitoring
+    stage: RISK_ASSESSMENT
+    weight: 0.7
+    description: Asking whether parents watch the device, or who else uses it.
+    patterns:
+      - '\b(do|does|will) your (parents?|mom|mum|dad|mother|father|family) (check|look at|read|see|go through|monitor)\b'
+      - '\bwho else (uses|has|looks at|can see) (your|the|this) (phone|device|tablet|account|computer|ipad)\b'
+      - '\bdo (your parents|they) know (about me|you(.re| are) (talking|chatting))\b'
+      - '\b(can|could|do) your parents see (this|these|our)\b'
+      - '\bis (this|it) your (own )?(phone|tablet|device)\b'
+
+  - id: parents_around
+    stage: RISK_ASSESSMENT
+    weight: 0.6
+    description: Asking whether parents are around right now.
+    patterns:
+      - '\b(are|is) your (parents?|mom|mum|dad|folks) (around|home|there|nearby|awake|watching)\b'
+      - '\bwhen do your (parents?|mom|mum|dad) (get home|come home|go to (bed|sleep|work))\b'
+
+  - id: home_alone
+    stage: ESCALATION
+    weight: 0.8
+    description: Asking whether the child is home alone.
+    patterns:
+      - '\bhome alone\b'
+      - '\bare you (all )?alone( right now| now| tonight)?\b'
+      - '\b(is )?anyone else (home|there|with you)\b'
+      - '\bwhen (are|will) you be alone\b'
+    exclude:
+      - '\b(lobby|server|match|game|squad|team|queue|solo|movie|film|show)\b'
+
+  - id: secrecy
+    stage: SECRECY
+    weight: 0.85
+    description: Asking the child to keep secrets.
+    patterns:
+      - "\\bdon'?t tell (anyone|anybody|your (mom|mum|dad|parents?|friends?|family|teacher|sister|brother))\\b"
+      - '\b(our( little)?|a little) secret\b'
+      - "\\b(it'?s|this is|that'?s) (our|a) secret\\b"
+      - '\bkeep (it|this|that) a secret\b'
+      - '\bkeep (this|it|us|that) (between us|secret|to yourself|quiet)\b'
+      - '\b(just|only) between (us|you and me)\b'
+      - '\b(no one|nobody) (needs|has|have) to know\b'
+      - '\byou (can.?t|cannot|shouldn.?t|must not) tell\b'
+      - "\\bdon'?t (show|mention) (this|it|me) to\\b"
+    exclude:
+      - '\b(surprise|birthday|party|present)\b'
+
+  - id: delete_chat
+    stage: SECRECY
+    weight: 0.8
+    description: Asking the child to delete messages.
+    patterns:
+      - '\bdelete (this|the|our|these|my|all the) (chat|messages?|convo|conversation|texts?|dms?|pics?|photos?)\b'
+      - '\b(clear|erase|wipe) (the|this|our) (chat|history|messages?)\b'
+      - '\bturn on (disappearing|vanish) (messages|mode)\b'
+
+  - id: platform_move
+    stage: PLATFORM_MOVE
+    weight: 0.6
+    description: Moving to a more private app.
+    patterns:
+      - '\b(add|message|dm|text|hit|find|call) me (up )?(on|in) (discord|snap|snapchat|telegram|whatsapp|insta|instagram|kik|signal|wickr|viber|line)\b'
+      - "\\blet'?s (talk|chat|move|go|switch|continue)( this)? (on|to|over to) (discord|snap|snapchat|telegram|whatsapp|insta|instagram|kik|signal|viber)\\b"
+      - "\\bwhat'?s your (snap|snapchat|discord|telegram|whatsapp|insta|kik|signal)\\b"
+      - '\b(do|you) (have|got) (snap|snapchat|telegram|whatsapp|kik|signal)\b'
+      - '\b(somewhere|someplace|an app) (more )?(private|safer|where no one)\b'
+      - '\bprivate (server|chat|channel|dm)\b'
+    exclude:
+      - '\b(class|school|team|clan|guild|our group|the group|tournament|club|everyone)\b'
+
+  - id: phone_number_request
+    stage: PLATFORM_MOVE
+    weight: 0.7
+    description: Asking for a phone number.
+    patterns:
+      - "\\b(what'?s|give me|send me|tell me|can i (get|have)) your (phone )?(number|digits|cell)\\b"
+      - '\bwhat is your (phone )?(number|cell)\b'
+      - '\b(text|call) me at\b'
+    exclude:
+      - '\b(leaderboard|level|rank|jersey|player|lobby|room code|score)\b'
+
+  - id: gift_offer
+    stage: FRIENDSHIP
+    weight: 0.35
+    description: Offering free in-game currency, items or gifts.
+    patterns:
+      - "\\bi('ll| will| can|'d| could) (give|send|buy|get|gift) you (some |free |a |an )?(\\d+ )?(robux|v-?bucks|diamonds|skins?|minecoins|gems|coins|gift ?cards?|load|battle ?pass|items?)\\b"
+      - '\bfree (robux|v-?bucks|diamonds|skins?|minecoins|gems)\b'
+      - '\b(want|need) (some )?(robux|v-?bucks|diamonds|minecoins)\b.{0,20}\?'
+
+  - id: money_for_favor
+    stage: ESCALATION
+    weight: 0.85
+    description: Money, gift cards or currency offered in exchange for something.
+    patterns:
+      - '\b(gift ?cards?|money|cash|gcash|paypal|load|robux|v-?bucks|diamonds|\$\d+|\d+ ?pesos)\b.{0,40}\b(if|when|for) you (send|do|show|turn|meet|call|come|delete|keep)\b'
+      - "\\bi('ll| will) (pay|send) you .{0,30}\\b(if|for) you\\b"
+      - '\b(if|when) you (send|show|do|meet)\b.{0,40}\b(gift ?cards?|money|cash|gcash|robux|v-?bucks|diamonds)\b'
+
+  - id: photo_request
+    stage: ESCALATION
+    weight: 0.85
+    description: Asking for photos or videos of the child.
+    patterns:
+      - '\bsend (me )?(a |some |more |another )?(pic|pics|picture|pictures|photo|photos|selfie|selfies|vid|video)\b'
+      - '\b(private|special|secret|cute|nice|real) (pic|pics|picture|pictures|photo|photos|selfie|selfies)\b'
+      - "\\b(can i|let me|i wanna|i want to) see (you|what you look like|a (pic|photo) of you)\\b"
+      - '\bshow me (yourself|what you look like|a (pic|photo))\b'
+      - '\b(pic|picture|photo|selfie) of (you|yourself)\b'
+    exclude:
+      - '\b(screenshot|build|base|skin|map|score|inventory|homework|meme)\b'
+      - "\\b(never|don'?t|do not) send\\b"
+
+  - id: video_call
+    stage: ESCALATION
+    weight: 0.75
+    description: Pushing for a private video call or camera.
+    patterns:
+      - '\bvideo ?(call|chat)\b'
+      - '\bface ?time (me|tonight|now)\b'
+      - '\bturn (on )?your (cam|camera|webcam)( on)?\b'
+      - '\b(cam|camera) (on|call)\b.{0,20}\b(just us|alone|private|tonight)\b'
+    exclude:
+      - '\b(grandma|grandpa|lola|lolo|family|class|teacher|team meeting)\b'
+
+  - id: meetup
+    stage: ESCALATION
+    weight: 0.9
+    description: Proposing to meet in person.
+    patterns:
+      - "\\b(let'?s|we should|wanna|want to|we could|can we|could we) meet( up)?( in person| irl| for real| somewhere| at| after)?\\b"
+      - '\bmeet (me|up)? ?(at|in|by|near) (the )?(mall|park|plaza|cafe|station|corner|jollibee|mcdo|playground)\b'
+      - "\\bi (can|could|will|'ll) (pick you up|come (to|by) your|visit you|drive (to|you))\\b"
+      - '\bwhere (can|could|should) we meet\b'
+      - '\bmeet (irl|in person|in real life)\b'
+    exclude:
+      - '\b(in game|in-game|lobby|server|spawn|base|map|match|tournament|practice|tryouts?)\b'
+
+  - id: exclusivity
+    stage: TRUST_EXCLUSIVITY
+    weight: 0.6
+    description: Flattery about maturity and claims of a special bond.
+    patterns:
+      - '\b(so |really |very )?mature for your age\b'
+      - '\bonly i (understand|get|know|care about|really know) (you|u)\b'
+      - '\byou can tell me anything\b'
+      - "\\b(i'?m|i am) the only one (who|that)\\b"
+      - "\\byou'?re (so )?special to me\\b"
+      - '\b(nobody|no one) (understands|gets|knows|cares about) you like (i do|me)\b'
+      - "\\byou'?re not like (other|the other) (kids|girls|boys)\\b"
+      - '\bi trust you more than anyone\b'
+      - '\bwe have a special (bond|connection|friendship)\b'
+
+  - id: isolation
+    stage: ISOLATION
+    weight: 0.6
+    description: Undermining parents/friends or pushing to talk alone or late.
+    patterns:
+      - "\\byour (parents?|mom|mum|dad|family) (don'?t|do not|never|wouldn'?t|won'?t) (understand|get|listen|care|let you)\\b"
+      - '\byour (parents?|mom|mum|dad) (are|is) (too )?(strict|annoying|controlling|overprotective|unfair)\b'
+      - '\byour friends (are|seem) (fake|immature|jealous|childish|not real|bad for you)\b'
+      - "\\byou don'?t need (them|your friends|your parents)\\b"
+      - '\b(after|when|once) (your parents|everyone|they|your mom|your dad) (go(es)? to (bed|sleep)|(are|is) asleep|falls? asleep)\b'
+      - '\b(stay|talk|chat) (up )?(late|all night)\b'
+      - '\b(just|only) (the two of us|you and me|us two)\b'
+      - '\bcome online (at|after) (midnight|night|\d+ ?(am|pm))\b'
+
+  - id: compliment_appearance
+    stage: FRIENDSHIP
+    weight: 0.25
+    description: Compliments on appearance (low weight; common in normal chat too).
+    patterns:
+      - "\\byou'?re (so |really |very )?(cute|pretty|beautiful|handsome|gorgeous|hot)\\b"
+      - '\byou (look|sound) (so |really )?(cute|pretty|beautiful|grown up|older)\b'
