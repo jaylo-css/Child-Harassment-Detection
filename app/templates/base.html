@@ -9,6 +9,7 @@
   <script src="/static/htmx.min.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
   {% if settings.simulator_mode %}
   <div class="banner banner-sim" role="status">Simulated data. This dashboard is running in simulator mode.</div>
   {% else %}
@@ -26,15 +27,15 @@
   <header class="topbar">
     <a class="brand" href="/alerts"><span class="shield" aria-hidden="true"></span>SafeChat Guardian</a>
     <nav aria-label="Main">
-      <a href="/alerts" class="{{ 'on' if active == 'alerts' }}">Alerts</a>
-      <a href="/analyze" class="{{ 'on' if active == 'analyze' }}">Analyze</a>
-      {% if operator %}<a href="/simulator" class="{{ 'on' if active == 'simulator' }}">Simulator</a>{% endif %}
-      <a href="/devices" class="{{ 'on' if active == 'devices' }}">Devices</a>
-      {% if operator %}<a href="/settings" class="{{ 'on' if active == 'settings' }}">Settings</a>{% endif %}
+      <a href="/alerts" class="{{ 'on' if active == 'alerts' }}"{% if active == 'alerts' %} aria-current="page"{% endif %}>Alerts</a>
+      <a href="/analyze" class="{{ 'on' if active == 'analyze' }}"{% if active == 'analyze' %} aria-current="page"{% endif %}>Analyze</a>
+      {% if operator %}<a href="/simulator" class="{{ 'on' if active == 'simulator' }}"{% if active == 'simulator' %} aria-current="page"{% endif %}>Simulator</a>{% endif %}
+      <a href="/devices" class="{{ 'on' if active == 'devices' }}"{% if active == 'devices' %} aria-current="page"{% endif %}>Devices</a>
+      {% if operator %}<a href="/settings" class="{{ 'on' if active == 'settings' }}"{% if active == 'settings' %} aria-current="page"{% endif %}>Settings</a>{% endif %}
     </nav>
     <span class="engine-pill" title="Scoring engine">engine: {{ effective_engine }}</span>
   </header>
-  <main>
+  <main id="main" tabindex="-1">
     {% block content %}{% endblock %}
   </main>
   <footer class="foot">

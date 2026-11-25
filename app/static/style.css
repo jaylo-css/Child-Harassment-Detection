@@ -90,7 +90,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 1.25rem 16px 2rem; }
 .btn.small { padding: .3rem .7rem; font-size: .85rem; }
 .btn.ghost { background: transparent; color: var(--accent); }
 .btn.alt { background: var(--surface-2); color: var(--text); border-color: var(--border); }
-.btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a:focus-visible, button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .form label { display: block; font-weight: 600; margin: .8rem 0 .3rem; }
 .form label.choice { font-weight: 400; }
@@ -191,3 +191,10 @@ details summary { cursor: pointer; }
   .composer input { grid-column: 1 / -1; }
   .transcript li, .chat li { max-width: 100%; }
 }
+
+/* Accessibility: skip link (visible on keyboard focus) and reduced motion */
+.skip-link { position: absolute; left: 8px; top: -48px; z-index: 100; padding: 8px 12px; border-radius: 6px;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none; }
+.skip-link:focus { top: 8px; }
+main:focus { outline: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

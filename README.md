@@ -1,5 +1,10 @@
 # SafeChat Guardian
 
+[![Backend CI](https://github.com/jaylo-css/Child-Harassment-Detection/actions/workflows/backend.yml/badge.svg)](https://github.com/jaylo-css/Child-Harassment-Detection/actions/workflows/backend.yml)
+[![Android APK](https://github.com/jaylo-css/Child-Harassment-Detection/actions/workflows/android.yml/badge.svg)](https://github.com/jaylo-css/Child-Harassment-Detection/actions/workflows/android.yml)
+
+**Live demo:** https://safechat-guardian.onrender.com &middot; **Android APK:** [debug-latest release](https://github.com/jaylo-css/Child-Harassment-Detection/releases/tag/debug-latest)
+
 A defensive child-safety prototype. It scores how far a chat conversation has moved along the
 known stages of online grooming and alerts a guardian with a privacy-preserving summary. It scores
 messages in real time from an Android companion app or the built-in simulator, and also accepts
@@ -110,6 +115,21 @@ On the free plan, the service sleeps when idle, and **the SQLite database is wip
 and deploy** (the disk is ephemeral). That is fine for a simulator demo. For anything persistent, add
 a Render disk and set `GUARDIAN_DB_URL=sqlite:////var/data/guardian.db`. Keep a public deployment on
 synthetic and simulator data only: the server database is not encrypted.
+
+### Deploy to Google Cloud Run
+
+The [Dockerfile](Dockerfile) builds the app, trains the baseline model, and runs it as a non-root user
+on port 8080.
+
+```bash
+gcloud run deploy safechat-guardian --source . --region asia-southeast1   --allow-unauthenticated --max-instances 1 --memory 1Gi   --set-env-vars GUARDIAN_SIMULATOR_MODE=1,GUARDIAN_DASHBOARD_PASSWORD=change-me
+```
+
+Or, without the CLI: in the Cloud Run console choose **Deploy container, then Continuously deploy
+from a repository**, pick this GitHub repo and select **Dockerfile** as the build type.
+
+* **`--max-instances 1`:** the stream engine keeps live conversation state in memory, so all traffic must reach one instance.
+* **No persistent storage:** the container filesystem is not persistent, so SQLite resets when an instance is replaced. That is fine for a simulator demo.
 
 ## Live simulator
 
