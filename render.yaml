@@ -1,0 +1,27 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Deploy: https://render.com/deploy?repo=https://github.com/jaylo-css/Child-Harassment-Detection
+services:
+  - type: web
+    name: safechat-guardian
+    runtime: python
+    plan: free
+    # Synthetic data is committed; the baseline model is trained at build time.
+    buildCommand: pip install -e ".[llm]" && python scripts/train_baseline.py --no-pan
+    # Single process on purpose: the stream engine, SSE broker and dedup state live in memory.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers
+    healthCheckPath: /healthz
+    envVars:
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"           # trust Render's proxy so request URLs are https
+      - key: PYTHON_VERSION
+        value: "3.11.11"
+      - key: GUARDIAN_DASHBOARD_PASSWORD
+        sync: false          # you are asked for this when creating the Blueprint; required on a public URL
+      - key: GUARDIAN_HASH_SALT
+        generateValue: true  # stable across deploys (otherwise a new salt file is made on every build)
+      - key: GUARDIAN_SIMULATOR_MODE
+        value: "1"           # public demo: synthetic data and simulator only
+      - key: GUARDIAN_ENGINE
+        value: baseline
+      - key: ANTHROPIC_API_KEY
+        sync: false          # optional; leave empty to run fully offline

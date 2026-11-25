@@ -10,6 +10,7 @@ import asyncio
 import io
 import json
 import logging
+import os
 import time
 import uuid
 from contextlib import asynccontextmanager, suppress
@@ -135,7 +136,9 @@ def _touch(app: FastAPI, device_id: str, message: bool) -> None:
 
 
 def _server_url(request: Request) -> str:
-    return (get_settings().public_url or str(request.base_url)).rstrip("/")
+    # RENDER_EXTERNAL_URL is set automatically on Render web services.
+    url = get_settings().public_url or os.environ.get("RENDER_EXTERNAL_URL") or str(request.base_url)
+    return url.rstrip("/")
 
 
 def _alert_dict(a: Alert) -> dict[str, Any]:

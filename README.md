@@ -96,6 +96,21 @@ Put the corpus you obtained yourself in `data/pan2012/`. `make train` then adds 
 windows, and `make eval` reports PAN metrics. The project never downloads, bundles or prints PAN
 text.
 
+### Deploy to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/jaylo-css/Child-Harassment-Detection)
+
+[render.yaml](render.yaml) is a Render Blueprint:
+* **Build:** it installs the app and trains the baseline model.
+* **Start:** it runs a single Uvicorn process with `/healthz` as the health check.
+* **Password:** Render asks you to set `GUARDIAN_DASHBOARD_PASSWORD`. Always set it, because the URL is public.
+* **Pairing:** the pairing QR code uses the service's `https://…onrender.com` URL automatically, so the phone app can pair over WSS.
+
+On the free plan, the service sleeps when idle, and **the SQLite database is wiped on every restart
+and deploy** (the disk is ephemeral). That is fine for a simulator demo. For anything persistent, add
+a Render disk and set `GUARDIAN_DB_URL=sqlite:////var/data/guardian.db`. Keep a public deployment on
+synthetic and simulator data only: the server database is not encrypted.
+
 ## Live simulator
 
 Open **Simulator** and click one of the scenarios (benign gaming chat, borderline, clear grooming
